@@ -1,0 +1,15 @@
+{loop name="carriersdelivery_order" type="carriersdelivery_orders" order_id=$order_id}
+    <dl class="dl-horizontal">
+        <dt>&nbsp;</dt>
+        <dd>
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#carriersdelivery_order_collapse" aria-expanded="false" aria-controls="carriersdelivery_order_collapse">
+                {intl d='carriersdelivery.bo.default' l='Details'}
+            </button>
+        </dd>
+    </dl>
+    <div class="collapse" id="carriersdelivery_order_collapse">
+        <div class="well well-sm">
+            <pre>{$POSTAGE_LOG}</pre>
+        </div>
+    </div>
+{/loop}

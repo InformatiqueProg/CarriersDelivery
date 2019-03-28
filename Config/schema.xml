@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database defaultIdMethod="native" name="thelia"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../core/vendor/propel/propel/resources/xsd/database.xsd" >
+    <table name="carriersdelivery_packingcosts" namespace="CarriersDelivery\Model">
+        <column name="id" type="INTEGER" autoIncrement="true" primaryKey="true" required="true" />
+        <column name="weight_max" type="DECIMAL" defaultValue="0.000000" size="16" scale="6" />
+        <column name="cost" type="DECIMAL"  defaultValue="0.000000" size="16" scale="6" />
+    </table>
+    <table name="carriersdelivery_carrier" namespace="CarriersDelivery\Model">
+        <column name="id" type="INTEGER" autoIncrement="true" primaryKey="true" required="true" />
+        <column name="name" type="VARCHAR" required="true" size="90" />
+        <column name="country_id" type="INTEGER" required="true" />
+        <column name="diesel_tax_percent" type="DECIMAL"  defaultValue="0.000000" size="16" scale="6" />
+        <column name="fees_cost" type="DECIMAL"  defaultValue="0.000000" size="16" scale="6" />
+        <column name="unit_per_kg" type="SMALLINT" required="true" />
+        <foreign-key foreignTable="country" name="fk_carriersdelivery_carrier_country_id" onDelete="restrict" onUpdate="restrict">
+            <reference foreign="id" local="country_id" />
+        </foreign-key>
+        <index name="carriersdelivery_carrier_country_id">
+            <index-column name="country_id" />
+        </index>
+    </table>
+    <table name="carriersdelivery_areas" namespace="CarriersDelivery\Model">
+        <column name="id" type="INTEGER" autoIncrement="true" primaryKey="true" required="true" />
+        <column name="name" type="VARCHAR" required="true" size="90" />
+        <column name="carrier_id" type="INTEGER" required="true" />
+        <column name="departments" type="ARRAY" />
+        <foreign-key foreignTable="carriersdelivery_carrier" name="fk_carriersdelivery_areas_carrier_id" onDelete="restrict" onUpdate="restrict">
+            <reference foreign="id" local="carrier_id" />
+        </foreign-key>
+        <index name="carriersdelivery_areas_carrier_id">
+            <index-column name="carrier_id" />
+        </index>
+    </table>
+    <table name="carriersdelivery_areascosts" namespace="CarriersDelivery\Model">
+        <column name="id" type="INTEGER" autoIncrement="true" primaryKey="true" required="true" />
+        <column name="carrierarea_id" type="INTEGER" required="true" />
+        <column name="weight_max" type="DECIMAL" defaultValue="0.000000" size="16" scale="6" />
+        <column name="cost" type="DECIMAL"  defaultValue="0.000000" size="16" scale="6" />
+        <foreign-key foreignTable="carriersdelivery_areas" name="fk_carriersdelivery_areascosts_carrierarea_id" onDelete="cascade" onUpdate="restrict">
+            <reference foreign="id" local="carrierarea_id" />
+        </foreign-key>
+        <index name="carriersdelivery_areascosts_carrierarea_id">
+            <index-column name="carrierarea_id" />
+        </index>
+    </table>
+    <table name="carriersdelivery_areascostskg" namespace="CarriersDelivery\Model">
+        <column name="id" type="INTEGER" autoIncrement="true" primaryKey="true" required="true" />
+        <column name="carrierarea_id" type="INTEGER" required="true" />
+        <column name="weight_max" type="DECIMAL" defaultValue="0.000000" size="16" scale="6" />
+        <column name="cost" type="DECIMAL"  defaultValue="0.000000" size="16" scale="6" />
+        <foreign-key foreignTable="carriersdelivery_areas" name="fk_carriersdelivery_areascostskg_carrierarea_id" onDelete="cascade" onUpdate="restrict">
+            <reference foreign="id" local="carrierarea_id" />
+        </foreign-key>
+        <index name="carriersdelivery_areascostskg_carrierarea_id">
+            <index-column name="carrierarea_id" />
+        </index>
+    </table>
+    <table name="carriersdelivery_order" namespace="CarriersDelivery\Model">
+        <column name="order_id" type="INTEGER" primaryKey="true" required="true" />
+        <column name="postage_log" type="LONGVARCHAR" required="false" />
+        <foreign-key foreignTable="order" name="fk_carriersdelivery_order_order_id" onDelete="cascade" onUpdate="restrict">
+            <reference foreign="id" local="order_id" />
+        </foreign-key>
+    </table>
+    <table name="carriersdelivery_product" namespace="CarriersDelivery\Model">
+        <column name="product_id" type="INTEGER" primaryKey="true" required="true" />
+        <column name="carrier_id" type="INTEGER" primaryKey="true" required="true" />
+        <foreign-key foreignTable="product" name="fk_carriersdelivery_product_product_id" onDelete="cascade" onUpdate="restrict">
+            <reference foreign="id" local="product_id" />
+        </foreign-key>
+        <foreign-key foreignTable="carriersdelivery_carrier" name="fk_carriersdelivery_product_carrier_id" onDelete="cascade" onUpdate="restrict">
+            <reference foreign="id" local="carrier_id" />
+        </foreign-key>
+    </table>
+    <external-schema filename="local/config/schema.xml" referenceOnly="true" />
+</database>

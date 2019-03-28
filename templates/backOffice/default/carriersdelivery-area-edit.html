@@ -1,0 +1,47 @@
+{extends file="admin-layout.tpl"}
+
+{block name="check-auth"}
+    {check_auth role="ADMIN" module="CarriersDelivery" access="UPDATE" login_tpl="/admin/login"}
+{/block}
+
+{block name="page-title"}{intl d='carriersdelivery.bo.default' l='CarriersDelivery'}{/block}
+
+{block name="main-content"}
+    <div class="carriersdelivery">
+        <div id="wrapper" class="container">
+            {include 'includes/carriersdelivery-menu.html' menu_active='carriers'}
+            <div class="general-block-decorator">
+                <div class="form-container">
+                    <div class="title title-without-tabs">
+                        {intl d='carriersdelivery.bo.default' l='Edit carrier\'s informations (%id)' id=$carrier_id}
+                    </div>
+                    {form name="carriersdelivery_area_edit"}
+                        {if $form_error}<div class="alert alert-danger">{$form_error_message}</div>{/if}
+
+                        <form class="form-horizontal" method="POST" action="{url router='carriersdelivery' route_id='carriersdelivery.admin.area.edit'}" {form_enctype form=$form}>
+                            {form_hidden_fields form=$form}
+
+                            {form_field form=$form field="success_url"}
+                            <input type="hidden" name="{$name}" value="{url router='carriersdelivery' route_id='carriersdelivery.admin.carrier.areas' carrier_id=$carrier_id}">
+                            {/form_field}
+
+                            <div style="max-width: 900px; margin: 0 auto;">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        {render_form_field form=$form field='name'}
+                                    </div>
+                                    <div class="col-md-6 col-md-offset-1">
+                                        {custom_render_form_field field="departments"}
+                                            <input type="text" {form_field_attributes field="departments"}>
+                                        {/custom_render_form_field}
+                                    </div>
+                                </div>
+                                {include file="includes/inner-form-toolbar.html" close_url="{url router='carriersdelivery' route_id='carriersdelivery.admin.carrier.areas' carrier_id=$carrier_id}" hide_flags=true page_bottom=true}
+                            </div>
+                        </form>
+                    {/form}
+                </div>
+            </div>
+        </div>
+    </div>
+{/block}

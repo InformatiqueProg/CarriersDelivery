@@ -1,0 +1,193 @@
+{extends file="admin-layout.tpl"}
+
+{block name="check-auth"}
+    {check_auth role="ADMIN" module="CarriersDelivery" access="VIEW" login_tpl="/admin/login"}
+{/block}
+
+{block name="page-title"}{intl d='carriersdelivery.bo.default' l='CarriersDelivery'}{/block}
+
+{block name="main-content"}
+    {$can_create = false}
+    {$can_delete = false}
+    {$can_update = false}
+    {loop type="auth" name="can_create" role="ADMIN" module="CarriersDelivery" access="CREATE"}
+        {$can_create = true}
+    {/loop}
+    {loop type="auth" name="can_delete" role="ADMIN" module="CarriersDelivery" access="DELETE"}
+        {$can_delete = true}
+    {/loop}
+    {loop type="auth" name="can_update" role="ADMIN" module="CarriersDelivery" access="UPDATE"}
+        {$can_update = true}
+    {/loop}
+    <div class="carriersdelivery">
+        <div id="wrapper" class="container">
+            {include 'includes/carriersdelivery-menu.html' menu_active='packingcosts'}
+            <div class="general-block-decorator">
+                {flash}
+                    <div class="alert alert-{$TYPE}">{$MESSAGE}</div>
+                {/flash}
+                <div class="table-responsive">
+                    <table class="table table-striped table-condensed" style="max-width: 600px;">
+                        <caption>
+                            {intl d='carriersdelivery.bo.default' l='Packing costs list'}
+                        </caption>
+                        <thead>
+                        <tr>
+                            <th>{intl d='carriersdelivery.bo.default' l='Weight max'}<small> (Kg)</small></th>
+                            <th>{intl d='carriersdelivery.bo.default' l='Cost'}<small> ({currency attr='symbol'})</small></th>
+                            <th class="actions">{intl l='Actions'}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {loop name="packingcosts_list" type="carriersdelivery_packingcosts" order="weight_max"}
+                        <tr class="slice" data-id="{$ID}">
+                            <td class="weight-max">
+                                <input type="text" class="form-control" value="{format_number number=$WEIGHT_MAX decimals="2" dec_point="." thousands_sep=" "}"/>
+                            </td>
+                            <td class="cost">
+                                <input type="text" class="form-control" value="{format_number number=$COST decimals="2" dec_point="." thousands_sep=" "}"/>
+                            </td>
+                            <td class="actions">
+                                <div class="btn-group">
+                                    {if $can_update}
+                                    <a class="btn btn-default btn-xs update hidden" title="{intl l='Save'}" href="#"><i class="glyphicon glyphicon-floppy-disk"></i></a>
+                                    {/if}
+                                    {if $can_delete}
+                                    <a class="btn btn-default btn-xs packingcost-delete" title="{intl l='Delete'}" href="#carriersdelivery_packingcost_delete_dialog" data-toggle="modal"><i class="glyphicon glyphicon-trash"></i></a>
+                                    {/if}
+                                </div>
+                            </td>
+                        </tr>
+                        {/loop}
+                        {if $can_create}
+                        <tr class="slice-add">
+                            <td class="weight-max">
+                                <input type="text" class="form-control" value="" placeholder="{intl d='carriersdelivery.bo.default' l='Weight max'} (Kg)"/>
+                            </td>
+                            <td class="cost">
+                                <input type="text" class="form-control" value="" placeholder="{intl d='carriersdelivery.bo.default' l='Cost'} ({currency attr='symbol'})"/>
+                            </td>
+                            <td class="actions">
+                                <div class="btn-group">
+                                    <a class="btn btn-default btn-xs" title="{intl l='Add'}"><i class="glyphicon glyphicon-plus-sign"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {/if}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {strip}
+        {form name="carriersdelivery_packingcost_create"}
+            {capture "carriersdelivery_packingcost_create_dialog"}
+                {form_hidden_fields form=$form}
+
+                {custom_render_form_field field="weight_max"}
+                    <input type="text" {form_field_attributes field="weight_max"}>
+                {/custom_render_form_field}
+
+                {custom_render_form_field field="cost"}
+                    <input type="text" {form_field_attributes field="cost"}>
+                {/custom_render_form_field}
+            {/capture}
+
+            {include
+                file                = 'includes/generic-create-dialog.html'
+                dialog_id           = 'carriersdelivery_packingcost_create_dialog'
+                dialog_title        = ''
+                dialog_body         = {$smarty.capture.carriersdelivery_packingcost_create_dialog nofilter}
+                dialog_ok_label     = {intl l='Save'}
+                form_action         = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.packingcost.create'}
+                form_enctype        = {form_enctype form=$form}
+                form_error_message  = $form_error_message
+            }
+        {/form}
+
+        {form name="carriersdelivery_packingcost_edit"}
+            {capture "carriersdelivery_packingcost_edit_dialog"}
+                {form_hidden_fields form=$form}
+
+                {custom_render_form_field field="weight_max"}
+                    <input type="text" {form_field_attributes field="weight_max"}>
+                {/custom_render_form_field}
+
+                {custom_render_form_field field="cost"}
+                    <input type="text" {form_field_attributes field="cost"}>
+                {/custom_render_form_field}
+            {/capture}
+
+            {include
+                file                = 'includes/generic-create-dialog.html'
+                dialog_id           = 'carriersdelivery_packingcost_edit_dialog'
+                dialog_title        = ''
+                dialog_body         = {$smarty.capture.carriersdelivery_packingcost_edit_dialog nofilter}
+                dialog_ok_label     = {intl l='Save'}
+                form_action         = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.packingcost.edit'}
+                form_enctype        = {form_enctype form=$form}
+                form_error_message  = $form_error_message
+            }
+        {/form}
+
+        {capture "carriersdelivery_packingcost_delete_dialog"}
+            <input type="hidden" name="packingcost_id" id="carriersdelivery_packingcost_delete_id" value="">
+        {/capture}
+
+        {include
+            file            = 'includes/generic-confirm-dialog.html'
+            dialog_id       = 'carriersdelivery_packingcost_delete_dialog'
+            dialog_title    = {intl d='carriersdelivery.bo.default' l='Delete this packing cost'}
+            dialog_message  = {intl d='carriersdelivery.bo.default' l='Do you really want to delete this packing cost?'}
+            form_action     = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.packingcost.delete'}
+            form_content    = {$smarty.capture.carriersdelivery_packingcost_delete_dialog nofilter}
+        }
+    {/strip}
+{/block}
+
+{block name="javascript-initialization"}
+    <script type="text/javascript">
+        function packingcostAjax($form) {
+            $.ajax({
+                type: "POST",
+                dataType: 'json',
+                data: $form.serialize(),
+                url: $form.attr('action')
+            }).done(function(data){
+                alert(data.message);
+                if (data.success) {
+                    window.location.replace("{url router='carriersdelivery' route_id='carriersdelivery.admin.packingcosts'}");
+                }
+            }).fail(function(jqXHR, textStatus){
+                alert(textStatus);
+            });
+        }
+
+        $(document).ready(function(){
+            $('#wrapper a.packingcost-delete').click(function(){
+                $('#carriersdelivery_packingcost_delete_id').val($(this).parents('tr.slice').data('id'));
+            });
+            $('#wrapper tr.slice-add .actions a').on('click', function (event) {
+                event.preventDefault();
+                var $slice = $(this).parents('tr.slice-add');
+                var $form = $('#carriersdelivery_packingcost_create_dialog form');
+                $form.find('#carriersdelivery_packingcost_create-id-weight_max').val($slice.find('td.weight-max input').val());
+                $form.find('#carriersdelivery_packingcost_create-id-cost').val($slice.find('td.cost input').val());
+                packingcostAjax($form);
+            });
+            $('#wrapper tr.slice .actions a.update').on('click', function (event) {
+                event.preventDefault();
+                var $slice = $(this).parents('tr.slice');
+                var $form = $('#carriersdelivery_packingcost_edit_dialog form');
+                $form.find("input[name='carriersdelivery_packingcost_edit[id]']").val($slice.data('id'));
+                $form.find('#carriersdelivery_packingcost_edit-id-weight_max').val($slice.find('td.weight-max input').val());
+                $form.find('#carriersdelivery_packingcost_edit-id-cost').val($slice.find('td.cost input').val());
+                packingcostAjax($form);
+            });
+            $('#wrapper tr.slice input').on('change', function () {
+                $(this).parents('tr').find('td.actions a.update').removeClass('hidden');
+            });
+        });
+    </script>
+{/block}

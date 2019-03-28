@@ -1,0 +1,15 @@
+<div class="row" style="padding-bottom: 10px;">
+    <div class="col-md-5">
+        <ul class="breadcrumb">
+            <li><a href="{url path='admin/home'}">{intl l='Home'}</a></li>
+            <li><a href="{url path='admin/modules'}">{intl l='Modules'}</a></li>
+            <li><a href="{url router='carriersdelivery' route_id='carriersdelivery.admin.carriers'}">{intl d='carriersdelivery.bo.default' l='CarriersDelivery'}</a></li>
+        </ul>
+        <div class="alert alert-warning text-center" style="max-width: 250px;"><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>  {intl d='carriersdelivery.bo.default' l='All prices are without taxes!'}</div>
+    </div>
+    <div class="col-md-7">
+        <a class="btn btn-lg {if $menu_active eq config}btn-primary{else}btn-default{/if}" href="{url router='carriersdelivery' route_id='carriersdelivery.admin.config'}">{intl l='Configuration'}</a>
+        <a class="btn btn-lg {if $menu_active eq carriers}btn-primary{else}btn-default{/if}" href="{url router='carriersdelivery' route_id='carriersdelivery.admin.carriers'}">{intl d='carriersdelivery.bo.default' l='Carriers list'}</a>
+        <a class="btn btn-lg {if $menu_active eq packingcosts}btn-primary{else}btn-default{/if}" href="{url router='carriersdelivery' route_id='carriersdelivery.admin.packingcosts'}">{intl d='carriersdelivery.bo.default' l='Packing costs list'}</a>
+    </div>
+</div>

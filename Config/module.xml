@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="http://thelia.net/schema/dic/module"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/module http://thelia.net/schema/dic/module/module-2_1.xsd">
+    <fullnamespace>CarriersDelivery\CarriersDelivery</fullnamespace>
+    <descriptive locale="en_US">
+        <title>CarriersDelivery module</title>
+    </descriptive>
+    <descriptive locale="fr_FR">
+        <title>Module CarriersDelivery</title>
+    </descriptive>
+    <languages>
+        <language>en_US</language>
+        <language>fr_FR</language>
+    </languages>
+    <version>1.0</version>
+    <author>
+        <name>Informatique Prog</name>
+        <email>contact@informatiqueprog.net</email>
+    </author>
+    <type>delivery</type>
+    <required>
+        <module version="&gt;=1.0.1">ZipCode</module>
+    </required>
+    <thelia>2.3.0</thelia>
+    <stability>prod</stability>
+</module>

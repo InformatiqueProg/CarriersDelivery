@@ -1,0 +1,15 @@
+<div class="well">
+    {form_field form=$form field='carrier_id'}
+    <div class="form-group form-group-carrier">
+        <label>{$label}</label>
+        {if $error}<div class="error-field">$message</div>{/if}
+        {foreach $choices as $cpt => $choice}
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="{$name|replace:'[]':''|cat:'['|cat:{$cpt}|cat:']'}" value="{$choice->value}" {if in_array($choice->value, $data)}checked{/if}> {$choice->label}
+            </label>
+        </div>
+        {/foreach}
+    </div>
+    {/form_field}
+</div>

@@ -1,0 +1,459 @@
+{extends file="admin-layout.tpl"}
+
+{block name="check-auth"}
+    {check_auth role="ADMIN" module="CarriersDelivery" access="VIEW" login_tpl="/admin/login"}
+{/block}
+
+{block name="page-title"}{intl d='carriersdelivery.bo.default' l='CarriersDelivery'}{/block}
+
+{block name="after-admin-css"}
+    <style>
+        #wrapper div.alert {
+            white-space: pre;
+        }
+        #wrapper .panel-heading {
+            font-size: 18px;
+        }
+        #formGetPrice .form-group {
+            margin-right: 10px;
+        }
+        #formGetPrice .form-group-reminder {
+            padding-bottom: 10px;
+        }
+        #formGetPrice .form-group input.small {
+            max-width: 80px;
+        }
+        table.table-areacost th span {
+            font-size: 0.8em;
+        }
+        table.table-areacost td input {
+            font-size: 11px;
+            max-width: 60px;
+            text-align: center;
+        }
+    </style>
+{/block}
+
+{block name="main-content"}
+    {$can_create = false}
+    {$can_delete = false}
+    {$can_update = false}
+    {loop type="auth" name="can_create" role="ADMIN" module="CarriersDelivery" access="CREATE"}
+        {$can_create = true}
+    {/loop}
+    {loop type="auth" name="can_delete" role="ADMIN" module="CarriersDelivery" access="DELETE"}
+        {$can_delete = true}
+    {/loop}
+    {loop type="auth" name="can_update" role="ADMIN" module="CarriersDelivery" access="UPDATE"}
+        {$can_update = true}
+    {/loop}
+    <div class="carriersdelivery">
+        <div id="wrapper" class="container">
+            {include 'includes/carriersdelivery-menu.html' menu_active='carriers'}
+            <div class="general-block-decorator">
+                {flash}
+                    <div class="alert alert-{$TYPE}">{$MESSAGE}</div>
+                {/flash}
+                <div class="table-responsive">
+                    <table class="table table-striped table-condensed">
+                        <caption>
+                            {loop name="carrier_name" type="carriersdelivery_carriers" id=$carrier_id}
+                                {$CARRIER_NAME = $NAME}
+                                {$CARRIER_DIESEL_TAX_PERCENT = $DIESEL_TAX_PERCENT}
+                                {$CARRIER_FEES_COST = $FEES_COST}
+                                {$CARRIER_UNIT_PER_KG = $UNIT_PER_KG}
+                            {/loop}
+                            {intl d='carriersdelivery.bo.default' l='Carrier\s areas (%name)' name=$CARRIER_NAME}
+                            {if $can_create}
+                            <a class="btn btn-primary action-btn" title="{intl l='Add'}" href="#carriersdelivery_area_create_dialog" data-toggle="modal">
+                                <span class="glyphicon glyphicon-plus-sign"></span>
+                            </a>
+                            {/if}
+                        </caption>
+                        {ifloop rel="areas_list"}
+                        <thead>
+                            <tr>
+                                <th>{intl l='ID'}</th>
+                                <th>{intl l='Name'}</th>
+                                <th>{intl d='carriersdelivery.bo.default' l='Departments'}</th>
+                                <th class="actions">{intl l='Actions'}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {loop name="areas_list" type="carriersdelivery_areas" carrier_id=$carrier_id order="name"}
+                            <tr>
+                                <td>{$ID}</td>
+                                <td class="object-title">
+                                    <a title="{intl l='Edit'}" href="{url router='CarriersDelivery' route_id='carriersdelivery.admin.area.edit' id=$ID}">{$NAME}</a>
+                                </td>
+                                <td>{$DEPARTMENTS|implode:','}</td>
+                                <td class="actions">
+                                    <div class="btn-group">
+                                        {if $can_update}
+                                        <a class="btn btn-default btn-xs" title="{intl l='Edit'}" href="{url router='CarriersDelivery' route_id='carriersdelivery.admin.area.edit' id=$ID}"><i class="glyphicon glyphicon-edit"></i></a>
+                                        {/if}
+                                        {if $can_delete}
+                                        <a class="btn btn-default btn-xs area-delete" title="{intl l='Delete'}" href="#carriersdelivery_area_delete_dialog" data-id="{$ID}" data-toggle="modal"><i class="glyphicon glyphicon-trash"></i></a>
+                                        {/if}
+                                    </div>
+                                </td>
+                            </tr>
+                        {/loop}
+                        </tbody>
+                        {/ifloop}
+                        {elseloop rel="areas_list"}
+                        <thead>
+                            <tr>
+                                <td class="text-center" colspan="6">
+                                    <div class="alert alert-info">
+                                        {intl d="carriersdelivery.bo.default" l="There is no results."}
+                                        {if $can_create}
+                                        <br>{intl d="carriersdelivery.bo.default" l="To create a new one, click the + button above."}
+                                        {/if}
+                                    </div>
+                                </td>
+                            </tr>
+                        </thead>
+                        {/elseloop}
+                    </table>
+                </div>
+                <div class="well well-sm text-center">
+                    <form class="form-inline">
+                    </form>
+                    <form class="form-inline" id="formGetPrice" action="{url router='carriersdelivery' route_id='carriersdelivery.admin.area.price'}" method="GET">
+                        <div class="form-group form-group-reminder">
+                            {intl d='carriersdelivery.bo.default' l='Diesel tax'}
+                            <input class="form-control small" type="text" placeholder="{if empty($CARRIER_DIESEL_TAX_PERCENT)}-{else}{format_number number=$CARRIER_DIESEL_TAX_PERCENT decimals="3" dec_point="." thousands_sep=" "} %{/if}" readonly>
+                            {intl d='carriersdelivery.bo.default' l='Fees cost'}
+                            <input class="form-control small" type="text" placeholder="{if empty($CARRIER_FEES_COST)}-{else}{format_money number=$CARRIER_FEES_COST decimals="2" dec_point="." thousands_sep=" "}{/if}" readonly>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-group-area">
+                            <label for="formGetPriceArea">{intl d='carriersdelivery.bo.default' l='Choose a area'}</label>
+                            <select name="area_id" id="formGetPriceArea">
+                                {foreach $carrier_areas as $carrierarea_id => $carrierarea_nom}
+                                    <option value="{$carrierarea_id}">{$carrierarea_nom}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <div class="form-group form-group-weight">
+                            <label for="formGetPriceWeight">{intl d='carriersdelivery.bo.default' l='Package weight'} (kg) </label>
+                            <input type="text" class="form-control small" id="formGetPriceWeight" name="weight" value="10">
+                        </div>
+                        <button type="submit" class="btn btn-primary">{intl d='carriersdelivery.bo.default' l='Get Price'}</button>
+                    </form>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {intl d='carriersdelivery.bo.default' l='Cost by area'}
+                        {if $can_create}
+                            <div class="pull-right">
+                                <a class="btn btn-primary btn-xs" title="{intl l='Add'}" href="#carriersdelivery_areacost_create_dialog" data-toggle="modal">
+                                    <span class="glyphicon glyphicon-plus-sign"></span>
+                                </a>
+                            </div>
+                        {/if}
+                    </div>
+                    <table class="table table-striped table-condensed table-areacost" id="areascosts">
+                        <caption>
+                        </caption>
+                        <thead>
+                        <tr>
+                            <th>{intl d="carriersdelivery.bo.default" l='Areas'}</th>
+                            {foreach $costDistinctWeights as $weightCol}
+                                <th class="text-center">{intl d="carriersdelivery.bo.default" l='Up to'}<br>{format_number number=$weightCol}<span> (kg)</span></th>
+                            {/foreach}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {foreach $carrier_areas as $carrier_area_id => $carrier_area_nom}
+                            <tr class="slice" data-area-id="{$carrier_area_id}">
+                                <td class="object-title">{$carrier_area_nom}</td>
+                                {foreach $costDistinctWeights as $weightCol}
+                                    <td data-id="{$costAreasWeights[$carrier_area_id][$weightCol]['id']}" class="text-center">
+                                        <input type="text" name="weight_cost" value="{format_number number=$costAreasWeights[$carrier_area_id][$weightCol]['cost'] decimals='2' dec_point='.' thousands_sep=' '}">
+                                    </td>
+                                {/foreach}
+                            </tr>
+                        {/foreach}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th>
+                                {if $can_update}
+                                    <a class="btn btn-primary btn-sm areacost-update hidden" title="{intl l='Edit'}" href="#carriersdelivery_areascosts_update_dialog" data-toggle="modal">
+                                        {intl l="Save"} <i class="glyphicon glyphicon-floppy-disk"></i>
+                                    </a>
+                                {/if}
+                            </th>
+                            {foreach $costDistinctWeights as $weightCol}
+                                <th class="text-center">
+                                    {if $can_delete}
+                                        <a class="btn btn-default btn-xs areacost-delete" title="{intl l='Delete'}" href="#carriersdelivery_areacost_delete_dialog" data-weight="{$weightCol}" data-toggle="modal">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    {/if}
+                                </th>
+                            {/foreach}
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {intl d='carriersdelivery.bo.default' l='Cost for %nbr Kg by area' nbr=$CARRIER_UNIT_PER_KG}
+                        {if $can_create}
+                            <div class="pull-right">
+                                <a class="btn btn-primary btn-xs" title="{intl l='Add'}" href="#carriersdelivery_areacostkg_create_dialog" data-toggle="modal">
+                                    <span class="glyphicon glyphicon-plus-sign"></span>
+                                </a>
+                            </div>
+                        {/if}
+                    </div>
+                    <table class="table table-striped table-condensed table-areacost" id="areascostskg">
+                        <caption>
+                        </caption>
+                        <thead>
+                        <tr>
+                            <th>{intl d="carriersdelivery.bo.default" l='Areas'}</th>
+                            {foreach $costkgDistinctWeights as $weightCol}
+                                <th class="text-center">{intl d="carriersdelivery.bo.default" l='Up to'}<br>{format_number number=$weightCol}<span> (kg)</span></th>
+                            {/foreach}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {foreach $carrier_areas as $carrier_area_id => $carrier_area_nom}
+                            <tr class="slice" data-area-id="{$carrier_area_id}">
+                                <td class="object-title">{$carrier_area_nom}</td>
+                                {foreach $costkgDistinctWeights as $weightCol}
+                                    <td data-id="{$costkgAreasWeights[$carrier_area_id][$weightCol]['id']}" class="text-center">
+                                        <input type="text" name="weight_cost" value="{format_number number=$costkgAreasWeights[$carrier_area_id][$weightCol]['cost'] decimals='2' dec_point='.' thousands_sep=' '}">
+                                    </td>
+                                {/foreach}
+                            </tr>
+                        {/foreach}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th>
+                                {if $can_update}
+                                    <a class="btn btn-primary btn-sm areacost-update hidden" title="{intl l='Edit'}" href="#carriersdelivery_areascostskg_update_dialog" data-toggle="modal">
+                                        {intl l="Save"} <i class="glyphicon glyphicon-floppy-disk"></i>
+                                    </a>
+                                {/if}
+                            </th>
+                            {foreach $costkgDistinctWeights as $weightCol}
+                                <th class="text-center">
+                                    {if $can_delete}
+                                        <a class="btn btn-default btn-xs areacostkg-delete" title="{intl l='Delete'}" href="#carriersdelivery_areacostkg_delete_dialog" data-weight="{$weightCol}" data-toggle="modal">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    {/if}
+                                </th>
+                            {/foreach}
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {strip}
+        {form name="carriersdelivery_area_create"}
+            {capture "carriersdelivery_area_create_dialog"}
+                {render_form_field form=$form field="carrier_id" value="$carrier_id"}
+
+                {form_field form=$form field="success_url"}
+                    <input type="hidden" name="{$name}" value="{url router='carriersdelivery' route_id='carriersdelivery.admin.carrier.areas' carrier_id=$carrier_id}">
+                {/form_field}
+
+                {form_hidden_fields form=$form}
+
+                {render_form_field form=$form field="name"}
+
+                {custom_render_form_field field="departments"}
+                    <input type="text" {form_field_attributes field="departments"}>
+                {/custom_render_form_field}
+            {/capture}
+
+            {include
+                file                = 'includes/generic-create-dialog.html'
+                dialog_id           = 'carriersdelivery_area_create_dialog'
+                dialog_title        = {intl d='carriersdelivery.bo.default' l='Add a area'}
+                dialog_body         = {$smarty.capture.carriersdelivery_area_create_dialog nofilter}
+                dialog_ok_label     = {intl l='Save'}
+                form_action         = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.area.create'}
+                form_enctype        = {form_enctype form=$form}
+                form_error_message  = $form_error_message
+            }
+        {/form}
+
+        {capture "carriersdelivery_area_delete_dialog"}
+            <input type="hidden" name="area_id" id="carriersdelivery_area_delete_id" value="">
+        {/capture}
+
+        {include
+            file            = 'includes/generic-confirm-dialog.html'
+            dialog_id       = 'carriersdelivery_area_delete_dialog'
+            dialog_title    = {intl d='carriersdelivery.bo.default' l='Delete this area'}
+            dialog_message  = {intl d='carriersdelivery.bo.default' l='Do you really want to delete this area?'}
+            form_action     = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.area.delete'}
+            form_content    = {$smarty.capture.carriersdelivery_area_delete_dialog nofilter}
+        }
+
+        {form name="carriersdelivery_areacost_create"}
+            {capture "carriersdelivery_areacost_create_dialog"}
+                {render_form_field form=$form field="carrier_id" value="$carrier_id"}
+
+                {form_field form=$form field="success_url"}
+                    <input type="hidden" name="{$name}" value="{url router='carriersdelivery' route_id='carriersdelivery.admin.carrier.areas' carrier_id=$carrier_id}">
+                {/form_field}
+
+                {form_hidden_fields form=$form}
+
+                {custom_render_form_field field="weight_max"}
+                    <input type="text" {form_field_attributes field="weight_max"}>
+                {/custom_render_form_field}
+            {/capture}
+
+            {include
+                file                = 'includes/generic-create-dialog.html'
+                dialog_id           = 'carriersdelivery_areacost_create_dialog'
+                dialog_title        = {intl d='carriersdelivery.bo.default' l='New weight max'}
+                dialog_body         = {$smarty.capture.carriersdelivery_areacost_create_dialog nofilter}
+                dialog_ok_label     = {intl l='Save'}
+                form_action         = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.areacost.create'}
+                form_enctype        = {form_enctype form=$form}
+                form_error_message  = $form_error_message
+            }
+        {/form}
+
+        {capture "carriersdelivery_areacost_delete_dialog"}
+            <input type="hidden" name="carrier_id" value="{$carrier_id}">
+            <input type="hidden" name="weight" id="carriersdelivery_areacost_delete_weight" value="">
+        {/capture}
+
+        {include
+            file            = 'includes/generic-confirm-dialog.html'
+            dialog_id       = 'carriersdelivery_areacost_delete_dialog'
+            dialog_title    = {intl d='carriersdelivery.bo.default' l='Delete this weight slice'}
+            dialog_message  = {intl d='carriersdelivery.bo.default' l='Do you really want to delete this weight slice?'}
+            form_action     = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.areacost.delete'}
+            form_content    = {$smarty.capture.carriersdelivery_areacost_delete_dialog nofilter}
+        }
+
+        {capture "carriersdelivery_areascosts_update_dialog"}
+            <input type="hidden" name="carrier_id" value="{$carrier_id}">
+            <input type="hidden" name="areascosts" id="carriersdelivery_areascosts_update" value="">
+        {/capture}
+
+        {include
+            file            = 'includes/generic-confirm-dialog.html'
+            dialog_id       = 'carriersdelivery_areascosts_update_dialog'
+            dialog_title    = {intl d='carriersdelivery.bo.default' l='Update this table costs'}
+            dialog_message  = {intl d='carriersdelivery.bo.default' l='Do you really want to update this table?'}
+            form_action     = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.areacost.update'}
+            form_content    = {$smarty.capture.carriersdelivery_areascosts_update_dialog nofilter}
+        }
+
+        {form name="carriersdelivery_areacostkg_create"}
+            {capture "carriersdelivery_areacostkg_create_dialog"}
+                {render_form_field form=$form field="carrier_id" value="$carrier_id"}
+
+                {form_field form=$form field="success_url"}
+                    <input type="hidden" name="{$name}" value="{url router='carriersdelivery' route_id='carriersdelivery.admin.carrier.areas' carrier_id=$carrier_id}">
+                {/form_field}
+
+                {form_hidden_fields form=$form}
+
+                {custom_render_form_field field="weight_max"}
+                    <input type="text" {form_field_attributes field="weight_max"}>
+                {/custom_render_form_field}
+            {/capture}
+
+            {include
+                file                = 'includes/generic-create-dialog.html'
+                dialog_id           = 'carriersdelivery_areacostkg_create_dialog'
+                dialog_title        = {intl d='carriersdelivery.bo.default' l='New weight max'}
+                dialog_body         = {$smarty.capture.carriersdelivery_areacostkg_create_dialog nofilter}
+                dialog_ok_label     = {intl l='Save'}
+                form_action         = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.areacostkg.create'}
+                form_enctype        = {form_enctype form=$form}
+                form_error_message  = $form_error_message
+            }
+        {/form}
+
+        {capture "carriersdelivery_areacostkg_delete_dialog"}
+            <input type="hidden" name="carrier_id" value="{$carrier_id}">
+            <input type="hidden" name="weight" id="carriersdelivery_areacostkg_delete_weight" value="">
+        {/capture}
+
+        {include
+            file            = 'includes/generic-confirm-dialog.html'
+            dialog_id       = 'carriersdelivery_areacostkg_delete_dialog'
+            dialog_title    = {intl d='carriersdelivery.bo.default' l='Delete this weight slice'}
+            dialog_message  = {intl d='carriersdelivery.bo.default' l='Do you really want to delete this weight slice?'}
+            form_action     = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.areacostkg.delete'}
+            form_content    = {$smarty.capture.carriersdelivery_areacostkg_delete_dialog nofilter}
+        }
+
+        {capture "carriersdelivery_areascostskg_update_dialog"}
+            <input type="hidden" name="carrier_id" value="{$carrier_id}">
+            <input type="hidden" name="areascostskg" id="carriersdelivery_areascostskg_update" value="">
+        {/capture}
+
+        {include
+            file            = 'includes/generic-confirm-dialog.html'
+            dialog_id       = 'carriersdelivery_areascostskg_update_dialog'
+            dialog_title    = {intl d='carriersdelivery.bo.default' l='Update this table costs'}
+            dialog_message  = {intl d='carriersdelivery.bo.default' l='Do you really want to update this table?'}
+            form_action     = {token_url router='carriersdelivery' route_id='carriersdelivery.admin.areacostkg.update'}
+            form_content    = {$smarty.capture.carriersdelivery_areascostskg_update_dialog nofilter}
+        }
+    {/strip}
+{/block}
+
+{block name="javascript-initialization"}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#wrapper a.area-delete').click(function () {
+                $('#carriersdelivery_area_delete_id').val($(this).data('id'));
+            });
+            $('#wrapper a.areacost-delete').click(function () {
+                $('#carriersdelivery_areacost_delete_weight').val($(this).data('weight'));
+            });
+            $('#wrapper a.areacostkg-delete').click(function () {
+                $('#carriersdelivery_areacostkg_delete_weight').val($(this).data('weight'));
+            });
+            $('table.table-areacost tr.slice input').on('change', function () {
+                $(this).parents('td').addClass('changed');
+                $(this).parents('table.table-areacost').find('tfoot a.areacost-update.hidden').removeClass('hidden');
+            });
+            $('table.table-areacost tfoot a.areacost-update').on('click', function (event) {
+                event.preventDefault();
+                var areascosts = [];
+                var $table = $(this).parents('table.table-areacost');
+                $table.find('tr.slice td.changed').each(function () {
+                    areascosts.push({
+                        id      : $(this).data('id'),
+                        cost    : $(this).find('input').val()
+                    });
+                });
+                $('#carriersdelivery_'+$table.attr('id')+'_update').val(JSON.stringify(areascosts));
+            });
+            $('#formGetPrice').on('submit', function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    dataType: 'json',
+                    data: $(this).serialize(),
+                    url: $(this).attr('action')
+                }).done(function(data){
+                    alert(data.message);
+                }).fail(function(jqXHR, textStatus){
+                    alert(textStatus);
+                });
+            });
+        });
+    </script>
+{/block}
