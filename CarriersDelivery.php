@@ -235,7 +235,7 @@ class CarriersDelivery extends BaseModule implements DeliveryModuleInterface
         /** @var Admin|null $adminUser */
         $adminUser = $session->getAdminUser();
 
-        if ($adminUser || $customerUser->getReseller() == 1) {
+        if ($adminUser || ($customerUser && $customerUser->getReseller() == 1)) {
             $country_id = $request->query->getInt('country');
 
             $zipcode = $request->query->getDigits('zipcode');
@@ -312,9 +312,9 @@ class CarriersDelivery extends BaseModule implements DeliveryModuleInterface
             throw new \Exception(__FUNCTION__ . ' / Error No result');
         }
 
-        /* @todo find better solution, to choose adminCode2 or adminCode3 */
+        /* Carriers don't use admin code in Belgium */
         if ($countryIsoalpha2 == 'BE') {
-            $department = $decodeJson->postalCodes[0]->adminCode3;
+            $department = substr($decodeJson->postalCodes[0]->postalCode, 0, 2);
         } else {
             $department = $decodeJson->postalCodes[0]->adminCode2;
         }
